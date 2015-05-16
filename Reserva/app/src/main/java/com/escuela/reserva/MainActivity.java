@@ -1,4 +1,4 @@
-package com.reserva;
+package com.escuela.reserva;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -43,9 +43,10 @@ public class MainActivity extends Activity implements OnSeekBarChangeListener,
 	String cuantasPersonasFormat = "";
 	int personas = 1; // Valor por omision, al menos 1 persona tiene que reservar
 
-	Calendar calendario;
+	Calendar calendar = Calendar.getInstance();
 
 	int contador = 0;
+	Date fechaReservacion;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -66,9 +67,10 @@ public class MainActivity extends Activity implements OnSeekBarChangeListener,
 
 		fecha = (Button) findViewById(R.id.fecha);
 		hora = (Button) findViewById(R.id.hora);
+		fecha.setOnClickListener(this);
+		hora.setOnClickListener(this);
 
 		barraPersonas.setOnSeekBarChangeListener(this);
-
 		nombre = (EditText) findViewById(R.id.nombre);
 
 		cuantasPersonasFormat = cuantasPersonas.getText().toString();
@@ -76,28 +78,28 @@ public class MainActivity extends Activity implements OnSeekBarChangeListener,
 		cuantasPersonas.setText("Personas: 1"); // condicion inicial
 
 		// Para seleccionar la fecha y la hora
-		Calendar fechaSeleccionada = Calendar.getInstance();
-		fechaSeleccionada.set(Calendar.HOUR_OF_DAY, 12); // hora inicial
-		fechaSeleccionada.clear(Calendar.MINUTE); // 0
-		fechaSeleccionada.clear(Calendar.SECOND); // 0
 
 		// formatos de la fecha y hora
 		fechaFormato = new SimpleDateFormat("yyyy-MM-dd");
 		horaFormato = new SimpleDateFormat("HH:mm");
 		// horaFormato = new SimpleDateFormat(hora.getText().toString());
-
-		// La primera vez mostramos la fecha actual
-		Date fechaReservacion = fechaSeleccionada.getTime();
-		fechaSel = fechaFormato.format(fechaReservacion);
-		fecha.setText(fechaSel); // fecha en el
-
+		try {
+			Bundle date_bundle = savedInstanceState.getBundle("date");
+			calendar.set(date_bundle.getInt("year"),
+					date_bundle.getInt("month"),
+					date_bundle.getInt("day"));
+			fecha.setText(fechaFormato.format(calendar.getTime()));
+		} catch (Exception e){
+			fecha.setText(fechaFormato.format(calendar.getTime()));
+		}
+		Log.d("onCreate", fechaFormato.getCalendar().getTime().toString());
+		calendar.set(Calendar.HOUR_OF_DAY, 12); // hora inicial
+		calendar.clear(Calendar.MINUTE); // 0
+		calendar.clear(Calendar.SECOND); // 0
+		fechaReservacion = calendar.getTime();
 		horaSel = horaFormato.format(fechaReservacion);
 		// boton
-		hora.setText(horaSel); // hora en el boton
-
-		// Otra forma de ocupar los botones
-		fecha.setOnClickListener(this);
-		hora.setOnClickListener(this);
+		hora.setText(horaSel); // hora en el boton*/
 
 	}
 
@@ -153,14 +155,13 @@ public class MainActivity extends Activity implements OnSeekBarChangeListener,
 		guardarEstado.putInt("contador", contador);
 		int amountPeopleBarProgress =  barraPersonas.getProgress();
 		guardarEstado.putInt("personas", amountPeopleBarProgress);
-		Date date = fechaFormato.getCalendar().getTime();
-		int year = date.getYear();
-		int month = date.getMonth();
-		int day = date.getDay();
+		Button fecha = (Button) findViewById(R.id.fecha);
+		Calendar calendar = fechaFormato.getCalendar();
+		Log.d("onSaveInstanceState", calendar.getTime().toString());
 		Bundle date_bundle = new Bundle();
-		date_bundle.putInt("year", year);
-		date_bundle.putInt("month", month);
-		date_bundle.putInt("day", day);
+		date_bundle.putInt("year", calendar.get(Calendar.YEAR));
+		date_bundle.putInt("month", calendar.get(Calendar.MONTH));
+		date_bundle.putInt("day", calendar.get(Calendar.DAY_OF_MONTH));
 		guardarEstado.putBundle("date", date_bundle);
 
 	}
@@ -172,14 +173,6 @@ public class MainActivity extends Activity implements OnSeekBarChangeListener,
 		texto.setText(String.valueOf(contador));
 		int amountPeopleBarProgress = recEstado.getInt("personas");
 		cuantasPersonas.setText(String.valueOf(amountPeopleBarProgress));
-		Bundle date_bundle = recEstado.getBundle("date");
-		Date date = new Date(
-				date_bundle.getInt("year"),
-				date_bundle.getInt("month"),
-				date_bundle.getInt("day"));
-		Log.d("user calendar", String.valueOf(date));
-		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-		fecha.setText(simpleDateFormat.format(date));
 	}
 
 
@@ -233,18 +226,16 @@ public class MainActivity extends Activity implements OnSeekBarChangeListener,
 
 	@Override
 	public void onDateSet(DatePicker picker, int anio, int mes, int dia) {
-		calendario = Calendar.getInstance();
-		calendario.set(Calendar.YEAR, anio);
-		calendario.set(Calendar.MONTH, mes);
-		calendario.set(Calendar.DAY_OF_MONTH, dia);
+		calendar.set(Calendar.YEAR, anio);
+		calendar.set(Calendar.MONTH, mes);
+		calendar.set(Calendar.DAY_OF_MONTH, dia);
 
-		fechaSel = fechaFormato.format(calendario.getTime());
+		fechaSel = fechaFormato.format(calendar.getTime());
 		fecha.setText(fechaSel);
 
 	}
 
 	public void onTimeSet(TimePicker picker, int horas, int minutos) {
-		Calendar calendar = Calendar.getInstance();
 		calendar.set(Calendar.HOUR_OF_DAY, horas);
 		calendar.set(Calendar.MINUTE, minutos);
 

@@ -1,4 +1,4 @@
-package com.reserva;
+package com.escuela.reserva;
 
 import android.app.Activity;
 import android.os.Bundle;
