@@ -85,21 +85,24 @@ public class MainActivity extends Activity implements OnSeekBarChangeListener,
 		// horaFormato = new SimpleDateFormat(hora.getText().toString());
 		try {
 			Bundle date_bundle = savedInstanceState.getBundle("date");
+			Bundle hour_bundle = savedInstanceState.getBundle("hour");
+			int hour = hour_bundle.getInt("hour");
 			calendar.set(date_bundle.getInt("year"),
 					date_bundle.getInt("month"),
-					date_bundle.getInt("day"));
-			fecha.setText(fechaFormato.format(calendar.getTime()));
+					date_bundle.getInt("day"),
+					hour_bundle.getInt("hour"),
+					hour_bundle.getInt("minute"));
+			Date user_date = calendar.getTime();
+			fecha.setText(fechaFormato.format(user_date));
+			hora.setText(horaFormato.format(user_date));
 		} catch (Exception e){
 			fecha.setText(fechaFormato.format(calendar.getTime()));
+			calendar.set(Calendar.HOUR_OF_DAY, 12); // hora inicial
+			calendar.clear(Calendar.MINUTE); // 0
+			horaSel = horaFormato.format(calendar.getTime());
+			hora.setText(horaSel);
 		}
-		Log.d("onCreate", fechaFormato.getCalendar().getTime().toString());
-		calendar.set(Calendar.HOUR_OF_DAY, 12); // hora inicial
-		calendar.clear(Calendar.MINUTE); // 0
-		calendar.clear(Calendar.SECOND); // 0
-		fechaReservacion = calendar.getTime();
-		horaSel = horaFormato.format(fechaReservacion);
-		// boton
-		hora.setText(horaSel); // hora en el boton*/
+
 
 	}
 
@@ -155,15 +158,19 @@ public class MainActivity extends Activity implements OnSeekBarChangeListener,
 		guardarEstado.putInt("contador", contador);
 		int amountPeopleBarProgress =  barraPersonas.getProgress();
 		guardarEstado.putInt("personas", amountPeopleBarProgress);
-		Button fecha = (Button) findViewById(R.id.fecha);
+
 		Calendar calendar = fechaFormato.getCalendar();
-		Log.d("onSaveInstanceState", calendar.getTime().toString());
 		Bundle date_bundle = new Bundle();
 		date_bundle.putInt("year", calendar.get(Calendar.YEAR));
 		date_bundle.putInt("month", calendar.get(Calendar.MONTH));
 		date_bundle.putInt("day", calendar.get(Calendar.DAY_OF_MONTH));
 		guardarEstado.putBundle("date", date_bundle);
 
+		calendar = horaFormato.getCalendar();
+		Bundle hour_bundle = new Bundle();
+		hour_bundle.putInt("hour", calendar.get(Calendar.HOUR_OF_DAY));
+		hour_bundle.putInt("minute", calendar.get(Calendar.MINUTE));
+		guardarEstado.putBundle("hour", hour_bundle);
 	}
 
 	@Override
